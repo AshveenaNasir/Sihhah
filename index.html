@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sihhah — Smart Hospital Discharge</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{sihhah:{50:'#EFFEFB',100:'#C8FFF4',200:'#91FFEA',300:'#53F5D9',400:'#20E0C2',500:'#0CBFA5',600:'#0D9488',700:'#0F766E',800:'#115E59',900:'#134E4A',950:'#042F2E'},gold:{400:'#FACC15',500:'#EAB308',600:'#CA8A04'}}}}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+<style>
+:root{--bg:#F5F7F6;--card:#fff;--text:#1A2332;--muted:#5A6B7A;--border:#E0E7EE;--primary:#0D9488;--primary-dark:#0F766E;--danger:#C62828;--danger-bg:#FEE2E2;--gold:#D97706;--gold-bg:#FEF3C7}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+.material-symbols-rounded{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle}
+.icon-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+
+.landing-bg{background:linear-gradient(160deg,#042F2E 0%,#0F766E 40%,#115E59 70%,#042F2E 100%);min-height:100vh;position:relative;overflow:hidden}
+.landing-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.06) 1px,transparent 1px);background-size:32px 32px}
+.geo-shape{position:absolute;border:1.5px solid rgba(255,255,255,.12);animation:geoFloat 12s ease-in-out infinite}
+.geo-shape:nth-child(2){top:15%;left:10%;width:80px;height:80px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);animation-delay:-3s;animation-duration:15s}
+.geo-shape:nth-child(3){top:60%;right:8%;width:60px;height:60px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);animation-delay:-7s;animation-duration:18s;border-color:rgba(20,184,166,.2)}
+.geo-shape:nth-child(4){bottom:20%;left:20%;width:50px;height:50px;clip-path:polygon(50% 0%,0% 100%,100% 100%);animation-delay:-5s;animation-duration:14s;border-color:rgba(234,179,8,.15)}
+.geo-shape:nth-child(5){top:30%;right:25%;width:100px;height:100px;border-radius:50%;animation-delay:-2s;animation-duration:20s;border-color:rgba(255,255,255,.06)}
+@keyframes geoFloat{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-20px) rotate(5deg)}50%{transform:translateY(10px) rotate(-3deg)}75%{transform:translateY(-15px) rotate(2deg)}}
+
+.glow-blob{position:absolute;width:400px;height:400px;border-radius:50%;filter:blur(120px);opacity:.15;animation:blobPulse 8s ease-in-out infinite}
+.glow-blob.teal{background:#14B8A6;top:-100px;left:-100px}
+.glow-blob.gold{background:#EAB308;bottom:-150px;right:-100px;animation-delay:-4s}
+@keyframes blobPulse{0%,100%{transform:scale(1);opacity:.15}50%{transform:scale(1.2);opacity:.22}}
+
+.view-enter{animation:viewIn .4s ease-out}
+@keyframes viewIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:0 8px 32px rgba(0,0,0,.06)}
+.card-lift:hover{transform:translateY(-2px)}
+
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;transition:background .15s}
+.check-item:hover{background:#F0FDFA}
+.check-box{width:22px;height:22px;min-width:22px;border-radius:6px;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.4,0,.2,1);margin-top:1px}
+.check-box.checked{background:var(--primary);border-color:var(--primary);transform:scale(1.05)}
+.check-box .material-symbols-rounded{font-size:16px;color:#fff;opacity:0;transform:scale(0);transition:all .25s cubic-bezier(.4,0,.2,1)}
+.check-box.checked .material-symbols-rounded{opacity:1;transform:scale(1)}
+.check-text{font-size:.925rem;line-height:1.5;transition:color .2s}
+.check-text.checked-text{color:#94A3B8;text-decoration:line-through}
+
+.progress-track{height:8px;background:#E2E8F0;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,#14B8A6,#0D9488)}
+
+.toast{padding:14px 20px;border-radius:12px;font-size:.9rem;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.12);animation:toastIn .35s ease-out;pointer-events:auto;max-width:380px}
+.toast.out{animation:toastOut .3s ease-in forwards}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(40px)}}
+
+.alert-pulse{animation:alertPulse 1.5s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,.4)}50%{box-shadow:0 0 0 10px rgba(198,40,40,0)}}
+
+.section-body{overflow:hidden;transition:max-height .35s ease,opacity .25s ease}
+.section-body.collapsed{max-height:0!important;opacity:0}
+
+.parse-step{display:flex;align-items:center;gap:10px;padding:8px 0;opacity:.4;transition:opacity .3s}
+.parse-step.active{opacity:1}
+.parse-step .step-icon{width:28px;height:28px;border-radius:50%;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.parse-step.active .step-icon{border-color:var(--primary);background:var(--primary)}
+.parse-step.active .step-icon .material-symbols-rounded{color:#fff;font-size:16px}
+.parse-step.done .step-icon{border-color:#059669;background:#059669}
+
+.warn-card{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:14px;transition:all .2s}
+.warn-card.reported{background:#FEE2E2;border-color:#F87171}
+.warn-card.acknowledged{background:#F0FDF4;border-color:#86EFAC}
+
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s}
+.modal-box{background:#fff;border-radius:18px;padding:32px;max-width:480px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.15);animation:modalIn .3s ease-out}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+.stat-num{font-size:2rem;font-weight:700;line-height:1}
+
+@media(max-width:640px){.stat-num{font-size:1.5rem}.modal-box{padding:24px;margin:12px}}
+
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:99px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-weight:600;font-size:.925rem;cursor:pointer;border:none;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(13,148,136,.3)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#B71C1C}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--primary);color:var(--primary);background:#F0FDFA}
+.btn-ghost{background:transparent;color:var(--muted);padding:8px 12px}.btn-ghost:hover{background:#F1F5F9;color:var(--text)}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold);filter:brightness(1.1)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+.notes-area{width:100%;min-height:220px;padding:16px;border:1.5px solid var(--border);border-radius:12px;font-family:'Space Grotesk',monospace;font-size:.9rem;line-height:1.7;resize:vertical;transition:border-color .2s;background:#FAFCFB;color:var(--text)}
+.notes-area:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.1)}
+.notes-area::placeholder{color:#94A3B8}
+
+.login-input{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid var(--border);font-family:'Space Grotesk',system-ui,sans-serif;font-size:.95rem;font-weight:500;transition:border-color .2s,box-shadow .2s;background:#fff;color:var(--text)}
+.login-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.1)}
+
+.tab-btn{padding:10px 20px;font-weight:600;font-size:.9rem;border-radius:10px;cursor:pointer;transition:all .2s;border:none;background:transparent;color:var(--muted);font-family:inherit}
+.tab-btn.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(13,148,136,.25)}
+.tab-btn:not(.active):hover{background:#F0FDFA;color:var(--primary)}
+
+.sev-critical{background:#FEE2E2;color:#991B1B}.sev-high{background:#FEF3C7;color:#92400E}.sev-moderate{background:#E0E7FF;color:#3730A3}
+
+.spinner{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div id="toast-container" class="fixed top-5 right-5 z-[200] flex flex-col gap-3 pointer-events-none"></div>
+<div id="modal-root"></div>
+
+<script>
+const SAMPLE_NOTE = `Patient: Ahmed Al Maktoum
+MRN: 2024-08-4521
+Discharge Date: January 15, 2025
+Diagnosis: Acute Exacerbation of COPD (Gold Stage III)
+
+Medications:
+1. Prednisolone 40mg - Take once daily in the morning for 5 days, then reduce to 20mg for 5 days
+2. Azithromycin 500mg - Take once daily for 3 days
+3. Salbutamol inhaler 100mcg - 2 puffs every 4-6 hours as needed for wheezing
+4. Tiotropium 18mcg - 1 inhalation once daily in the morning
+5. Omeprazole 20mg - Take once daily before breakfast
+
+Follow-up:
+- Pulmonology clinic in 2 weeks (January 29, 2025)
+- PCP review in 4 weeks (February 12, 2025)
+- Lab work: CBC, BMP in 1 week
+
+Diet:
+- Low sodium diet (less than 2g per day)
+- Increase fluid intake to 2-3 liters daily
+- Small frequent meals
+- Avoid caffeine and alcohol
+
+Activity:
+- Light walking only for first week
+- Pulmonary rehabilitation exercises as demonstrated
+- Avoid heavy lifting greater than 10kg
+- Use oxygen concentrator at 2L/min during sleep and exertion
+
+Warning Signs - Return to ER if:
+- Increased shortness of breath not relieved by inhaler
+- Fever above 38.5 degrees C
+- Chest pain
+- Confusion or excessive drowsiness
+- Bluish discoloration of lips or fingertips
+- Inability to keep medications down`;
+
+const STORAGE_KEY = 'sihhah_db';
+let currentUser = null;
+
+function getDB() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
+    return initSeedData();
+}
+function saveDB(db) { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+function uid() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function initSeedData() {
+    const db = { patients: [seedPatient1(), seedPatient2(), seedPatient3()] };
+    saveDB(db);
+    return db;
+}
+
+function seedPatient1() {
+    return {
+        id:'p001', patientName:'Ahmed Al Maktoum', mrn:'2024-08-4521', dischargeDate:'Jan 15, 2025',
+        diagnosis:'Acute Exacerbation of COPD (Gold Stage III)',
+        medications:[
+            {id:'m1',name:'Prednisolone',dose:'40mg',frequency:'Once daily morning, 5 days then 20mg',checked:true,timeGroup:'morning'},
+            {id:'m2',name:'Azithromycin',dose:'500mg',frequency:'Once daily for 3 days',checked:true,timeGroup:'morning'},
+            {id:'m3',name:'Salbutamol inhaler',dose:'100mcg',frequency:'2 puffs every 4-6h as needed',checked:false,timeGroup:'as-needed'},
+            {id:'m4',name:'Tiotropium',dose:'18mcg',frequency:'1 inhalation once daily morning',checked:false,timeGroup:'morning'},
+            {id:'m5',name:'Omeprazole',dose:'20mg',frequency:'Once daily before breakfast',checked:true,timeGroup:'morning'}
+        ],
+        followUps:[{id:'f1',type:'Pulmonology Clinic',date:'Jan 29, 2025',checked:false},{id:'f2',type:'PCP Review',date:'Feb 12, 2025',checked:false}],
+        diet:[{id:'d1',instruction:'Low sodium diet (<2g/day)',checked:true},{id:'d2',instruction:'Increase fluids to 2-3L daily',checked:false},{id:'d3',instruction:'Small frequent meals',checked:true},{id:'d4',instruction:'Avoid caffeine and alcohol',checked:false}],
+        activity:[{id:'a1',instruction:'Light walking only for first week',checked:true},{id:'a2',instruction:'Pulmonary rehabilitation exercises',checked:false},{id:'a3',instruction:'Avoid heavy lifting >10kg',checked:true},{id:'a4',instruction:'Oxygen concentrator 2L/min during sleep',checked:false}],
+        labs:[{id:'l1',test:'CBC, BMP',timing:'In 1 week',checked:false}],
+        warningSigns:[
+            {id:'w1',symptom:'Increased shortness of breath not relieved by inhaler',severity:'critical',reported:false,acknowledged:false},
+            {id:'w2',symptom:'Fever above 38.5°C',severity:'critical',reported:false,acknowledged:false},
+            {id:'w3',symptom:'Chest pain',severity:'critical',reported:false,acknowledged:false},
+            {id:'w4',symptom:'Confusion or excessive drowsiness',severity:'high',reported:false,acknowledged:false},
+            {id:'w5',symptom:'Bluish discoloration of lips or fingertips',severity:'critical',reported:false,acknowledged:false},
+            {id:'w6',symptom:'Inability to keep medications down',severity:'moderate',reported:false,acknowledged:false}
+        ],
+        alerts:[], createdAt:'2025-01-15T10:00:00Z'
+    };
+}
+
+function seedPatient2() {
+    return {
+        id:'p002', patientName:'Fatima Al Zahra', mrn:'2024-11-7834', dischargeDate:'Jan 18, 2025',
+        diagnosis:'Post-Operative Right Total Knee Replacement',
+        medications:[
+            {id:'m10',name:'Tramadol 50mg',dose:'50mg',frequency:'Every 6 hours as needed for pain',checked:false,timeGroup:'as-needed'},
+            {id:'m11',name:'Enoxaparin',dose:'40mg',frequency:'Once daily subcutaneous injection',checked:true,timeGroup:'evening'},
+            {id:'m12',name:'Paracetamol',dose:'1g',frequency:'Every 8 hours regularly',checked:true,timeGroup:'morning'},
+            {id:'m13',name:'Pantoprazole',dose:'40mg',frequency:'Once daily before breakfast',checked:false,timeGroup:'morning'}
+        ],
+        followUps:[{id:'f10',type:'Orthopedic Follow-up',date:'Jan 25, 2025',checked:false},{id:'f11',type:'Physiotherapy Assessment',date:'Jan 20, 2025',checked:false},{id:'f12',type:'Suture Removal',date:'Jan 22, 2025',checked:false}],
+        diet:[{id:'d10',instruction:'High protein diet for wound healing',checked:false},{id:'d11',instruction:'Calcium and Vitamin D supplementation',checked:false},{id:'d12',instruction:'Stay hydrated minimum 2L daily',checked:true}],
+        activity:[{id:'a10',instruction:'Use walker for all mobility',checked:true},{id:'a11',instruction:'Physiotherapy exercises 3x daily',checked:false},{id:'a12',instruction:'No weight bearing on right leg',checked:true},{id:'a13',instruction:'Elevate leg when sitting',checked:false}],
+        labs:[{id:'l10',test:'CRP, ESR',timing:'In 5 days',checked:false}],
+        warningSigns:[
+            {id:'w10',symptom:'Severe increasing pain not controlled by medication',severity:'critical',reported:false,acknowledged:false},
+            {id:'w11',symptom:'Fever above 38°C',severity:'high',reported:true,acknowledged:false},
+            {id:'w12',symptom:'Swelling or redness around surgical site',severity:'high',reported:false,acknowledged:false},
+            {id:'w13',symptom:'Calf pain or swelling',severity:'critical',reported:false,acknowledged:false},
+            {id:'w14',symptom:'Shortness of breath or chest pain',severity:'critical',reported:false,acknowledged:false}
+        ],
+        alerts:[{id:'al1',symptom:'Fever above 38°C',time:'2025-01-19T08:30:00Z',acknowledged:false}],
+        createdAt:'2025-01-18T14:00:00Z'
+    };
+}
+
+function seedPatient3() {
+    return {
+        id:'p003', patientName:'Omar Hassan', mrn:'2024-06-3291', dischargeDate:'Jan 10, 2025',
+        diagnosis:'Acute Decompensated Heart Failure (NYHA Class III)',
+        medications:[
+            {id:'m20',name:'Furosemide',dose:'40mg',frequency:'Once daily morning',checked:true,timeGroup:'morning'},
+            {id:'m21',name:'Carvedilol',dose:'6.25mg',frequency:'Twice daily with meals',checked:true,timeGroup:'twice-daily'},
+            {id:'m22',name:'Lisinopril',dose:'10mg',frequency:'Once daily morning',checked:true,timeGroup:'morning'},
+            {id:'m23',name:'Spironolactone',dose:'25mg',frequency:'Once daily morning',checked:true,timeGroup:'morning'},
+            {id:'m24',name:'Aspirin',dose:'100mg',frequency:'Once daily after lunch',checked:false,timeGroup:'after-meal'},
+            {id:'m25',name:'Atorvastatin',dose:'40mg',frequency:'Once daily at bedtime',checked:false,timeGroup:'evening'}
+        ],
+        followUps:[{id:'f20',type:'Cardiology Clinic',date:'Jan 24, 2025',checked:true},{id:'f21',type:'Cardiac Rehab Enrollment',date:'Feb 1, 2025',checked:false}],
+        diet:[{id:'d20',instruction:'Low sodium diet (<1.5g/day)',checked:true},{id:'d21',instruction:'Fluid restriction 1.5L/day',checked:true},{id:'d22',instruction:'Low fat, heart-healthy diet',checked:true},{id:'d23',instruction:'Weigh yourself every morning',checked:false}],
+        activity:[{id:'a20',instruction:'Gradual increase in walking distance',checked:true},{id:'a21',instruction:'Stop activity if short of breath',checked:true},{id:'a22',instruction:'Avoid strenuous exercise for 4 weeks',checked:true},{id:'a23',instruction:'Cardiac rehabilitation when enrolled',checked:false}],
+        labs:[{id:'l20',test:'BNP, Renal Function, Electrolytes',timing:'In 3 days',checked:true},{id:'l21',test:'Lipid Panel',timing:'In 2 weeks',checked:false}],
+        warningSigns:[
+            {id:'w20',symptom:'Sudden weight gain >2kg in 2 days',severity:'critical',reported:false,acknowledged:false},
+            {id:'w21',symptom:'Increasing shortness of breath at rest',severity:'critical',reported:false,acknowledged:false},
+            {id:'w22',symptom:'Swelling in legs or abdomen worsening',severity:'high',reported:false,acknowledged:false},
+            {id:'w23',symptom:'Dizziness or fainting',severity:'high',reported:false,acknowledged:false},
+            {id:'w24',symptom:'Irregular or rapid heartbeat',severity:'moderate',reported:false,acknowledged:false}
+        ],
+        alerts:[], createdAt:'2025-01-10T09:00:00Z'
+    };
+}
+
+function parseDischargeNotes(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const r = { id:uid(), patientName:'', mrn:'', dischargeDate:'', diagnosis:'', medications:[], followUps:[], diet:[], activity:[], labs:[], warningSigns:[], alerts:[], createdAt:new Date().toISOString() };
+    let sec = 'header'; let ctr = 0; const nid = p => p+(++ctr);
+    for (let i = 0; i < lines.length; i++) {
+        const lo = lines[i].toLowerCase(), orig = lines[i];
+        if (/^(medications?|meds?|drugs?):?\s*$/i.test(lo) || /^medications?:/i.test(lo)) { sec='meds'; continue; }
+        if (/^(follow[\s-]?up|appointments?|reviews?):?\s*$/i.test(lo) || /^follow[\s-]?up:/i.test(lo)) { sec='fu'; continue; }
+        if (/^(diet|nutrition|food|dietary?):?\s*$/i.test(lo) || /^diet:/i.test(lo)) { sec='diet'; continue; }
+        if (/^(activity|activities|exercise|physical\s*activity|mobility):?\s*$/i.test(lo) || /^activity:/i.test(lo)) { sec='act'; continue; }
+        if (/^(warning|red\s*flag|seek\s*help|return\s*to\s*er|when\s*to\s*call|emergency):?\s*$/i.test(lo) || /^(warning|red\s*flag)/i.test(lo)) { sec='warn'; continue; }
+        if (/^(lab|blood\s*work|tests?):?\s*$/i.test(lo) || /^lab/i.test(lo)) { sec='labs'; continue; }
+        if (sec === 'header') {
+            let m; if ((m = orig.match(/patient:\s*(.+)/i))) { r.patientName=m[1].trim(); continue; }
+            if ((m = orig.match(/(?:mrn|medical record|id):\s*(.+)/i))) { r.mrn=m[1].trim(); continue; }
+            if ((m = orig.match(/discharge\s*date:\s*(.+)/i))) { r.dischargeDate=m[1].trim(); continue; }
+            if ((m = orig.match(/diagnosis:\s*(.+)/i))) { r.diagnosis=m[1].trim(); continue; }
+        }
+        if (sec === 'meds') {
+            let m = orig.match(/^\d+[\.\)]\s*(.+?)\s+(\d+\s*(?:mg|mcg|ml|units?|%|g))\s*[-–—]\s*(.+)$/i);
+            if (m) {
+                let tg='morning', f=m[3];
+                if (/evening|night|bedtime|hs/i.test(f)) tg='evening';
+                else if (/as needed|prn/i.test(f)) tg='as-needed';
+                else if (/twice|bid|2 times/i.test(f)) tg='twice-daily';
+                else if (/after (meal|lunch|dinner)/i.test(f)) tg='after-meal';
+                else if (/before (meal|breakfast)/i.test(f)) tg='before-meal';
+                r.medications.push({id:nid('m'),name:m[1].trim(),dose:m[2].trim(),frequency:f.trim(),checked:false,timeGroup:tg}); continue;
+            }
+            m = orig.match(/^\d+[\.\)]\s*(.+)/);
+            if (m && m[1].length > 5) { r.medications.push({id:nid('m'),name:m[1].trim(),dose:'As prescribed',frequency:'As directed',checked:false,timeGroup:'morning'}); continue; }
+        }
+        if (sec === 'fu') {
+            if (/lab|blood|cbc|bmp/i.test(lo)) { sec='labs'; i--; continue; }
+            let clean = orig.replace(/^[-•*\d.\)]\s*/,'').trim();
+            let m = orig.match(/^(.+?)\s*[-–—]?\s*((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\.?\s+\d{1,2},?\s+\d{4})$/i);
+            if (m) { r.followUps.push({id:nid('f'),type:m[1].trim().replace(/^[-•*]\s*/,''),date:m[2].trim(),checked:false}); continue; }
+            m = orig.match(/^[-•*]?\s*(.+?)\s+in\s+(\d+\s*(?:weeks?|days?|months?))/i);
+            if (m) { r.followUps.push({id:nid('f'),type:m[1].trim(),date:m[2].trim(),checked:false}); continue; }
+            if (clean.length > 3) { r.followUps.push({id:nid('f'),type:clean,date:'As scheduled',checked:false}); continue; }
+        }
+        if (sec === 'diet') { let c = orig.replace(/^[-•*\d.\)]\s*/,'').trim(); if (c.length > 3) { r.diet.push({id:nid('d'),instruction:c,checked:false}); continue; } }
+        if (sec === 'act') { let c = orig.replace(/^[-•*\d.\)]\s*/,'').trim(); if (c.length > 3) { r.activity.push({id:nid('a'),instruction:c,checked:false}); continue; } }
+        if (sec === 'warn') {
+            let c = orig.replace(/^[-•*\d.\)]\s*/,'').trim();
+            if (c.length > 3) { let s='moderate'; if (/chest pain|breathing|blue|unconscious|severe bleed/i.test(c)) s='critical'; else if (/fever|confusion|drowsiness|vomit|persistent|swelling/i.test(c)) s='high'; r.warningSigns.push({id:nid('w'),symptom:c,severity:s,reported:false,acknowledged:false}); continue; }
+        }
+        if (sec === 'labs') {
+            let m = orig.match(/^(.+?)\s+(?:in|within)\s+(\d+\s*(?:weeks?|days?|months?))/i);
+            if (m) { r.labs.push({id:nid('l'),test:m[1].trim().replace(/^[-•*\d.\)]\s*/,''),timing:'In '+m[2].trim(),checked:false}); continue; }
+            let c = orig.replace(/^[-•*\d.\)]\s*/,'').trim();
+            if (c.length > 2) { r.labs.push({id:nid('l'),test:c,timing:'As scheduled',checked:false}); continue; }
+        }
+    }
+    if (r.medications.length === 0) {
+        for (const l of lines) { const m = l.match(/([A-Z][a-z]+(?:\s+[a-z]+)*)\s+(\d+\s*(?:mg|mcg|ml|%|g))/i); if (m && !/diagnosis|patient|discharge/i.test(l)) r.medications.push({id:nid('m'),name:m[1].trim(),dose:m[2].trim(),frequency:'As prescribed',checked:false,timeGroup:'morning'}); }
+    }
+    if (!r.patientName) r.patientName = 'Unknown Patient';
+    return r;
+}
+
+function getProgress(p) { const all = [...p.medications,...p.followUps,...p.diet,...p.activity,...p.labs]; if (!all.length) return 0; return Math.round(all.filter(i=>i.checked).length / all.length * 100); }
+function activeAlerts(db) { return db.patients.reduce((n,p) => n + p.alerts.filter(a=>!a.acknowledged).length, 0); }
+function timeAgo(iso) { const d = Date.now() - new Date(iso).getTime(), m = Math.floor(d/60000); if (m < 1) return 'Just now'; if (m < 60) return m+'m ago'; const h = Math.floor(m/60); if (h < 24) return h+'h ago'; return Math.floor(h/24)+'d ago'; }
+function escHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function toast(msg, type='info') {
+    const c = document.getElementById('toast-container');
+    const colors = { info:'background:#0F766E;color:#fff', success:'background:#059669;color:#fff', error:'background:#C62828;color:#fff', warning:'background:#D97706;color:#fff' };
+    const icons = { info:'info', success:'check_circle', error:'error', warning:'warning' };
+    const el = document.createElement('div');
+    el.className = 'toast'; el.style.cssText = colors[type]||colors.info;
+    el.innerHTML = `<span class="material-symbols-rounded" style="font-size:20px">${icons[type]||'info'}</span><span>${escHtml(msg)}</span>`;
+    c.appendChild(el);
+    setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),300); }, 3500);
+}
+
+function showModal(html) {
+    document.getElementById('modal-root').innerHTML = `<div class="modal-overlay" id="modal-overlay"><div class="modal-box">${html}</div></div>`;
+}
+function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
+
+function navigate(hash) { window.location.hash = hash; }
+
+function router() {
+    const h = window.location.hash || '#landing';
+    const app = document.getElementById('app');
+    if (h === '#landing' || h === '' || h === '#') { app.innerHTML = renderLanding(); }
+    else if (h === '#login/staff') { app.innerHTML = renderLogin('staff'); }
+    else if (h === '#login/patient') { app.innerHTML = renderLogin('patient'); }
+    else if (h === '#staff') { app.innerHTML = renderStaff('new'); }
+    else if (h === '#staff/dashboard') { app.innerHTML = renderStaff('dashboard'); }
+    else if (h.startsWith('#patient/')) { app.innerHTML = renderPatient(h.split('/')[1]); }
+    else { app.innerHTML = renderNotFound(); }
+    window.scrollTo(0,0);
+}
+
+function renderLogin(type) {
+    const isStaff = type === 'staff';
+    const defaultName = isStaff ? 'Dr. Ahmed Ali' : 'Ayesha';
+    const roleLabel = isStaff ? 'Clinical Staff' : 'Patient';
+    const icon = isStaff ? 'local_hospital' : 'person';
+    const accentColor = isStaff ? 'sihhah' : 'gold';
+    return `<div class="min-h-screen bg-[var(--bg)] flex items-center justify-center px-6">
+    <div class="card p-8 max-w-sm w-full view-enter text-center">
+        <div class="w-16 h-16 rounded-full bg-${accentColor}-100 flex items-center justify-center mx-auto mb-5">
+            <span class="material-symbols-rounded text-${accentColor}-700 text-3xl">${icon}</span>
+        </div>
+        <h2 class="text-2xl font-bold mb-1">${roleLabel} Login</h2>
+        <p class="text-[var(--muted)] text-sm mb-6">Welcome to Sihhah</p>
+        <div class="mb-5 text-left">
+            <label class="block text-xs font-semibold text-[var(--muted)] mb-1.5 uppercase tracking-wider">Full Name</label>
+            <input id="login-name" type="text" value="${defaultName}" class="login-input">
+        </div>
+        <div class="mb-5 text-left">
+            <label class="block text-xs font-semibold text-[var(--muted)] mb-1.5 uppercase tracking-wider">Password</label>
+            <input id="login-pass" type="password" value="${isStaff ? 'doctor123' : 'patient123'}" class="login-input">
+        </div>
+        <button data-action="do-login" data-type="${type}" class="btn btn-primary w-full justify-center py-3 text-base">
+            <span class="material-symbols-rounded">arrow_forward</span> Continue
+        </button>
+        <button data-action="navigate" data-to="#landing" class="btn btn-ghost w-full justify-center mt-3 text-sm">
+            <span class="material-symbols-rounded text-base icon-outlined">arrow_back</span> Back to Home
+        </button>
+    </div>
+</div>`;
+}
+
+function renderLanding() {
+    return `<div class="landing-bg flex flex-col">
+    <div class="landing-dots"></div>
+    <div class="glow-blob teal"></div><div class="glow-blob gold"></div>
+    <div class="geo-shape"></div><div class="geo-shape"></div><div class="geo-shape"></div><div class="geo-shape"></div>
+
+    <nav class="relative z-10 flex items-center justify-between px-6 sm:px-10 py-5">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-rounded text-sihhah-400 text-3xl">healing</span>
+            <span class="text-white font-bold text-xl tracking-tight">Sihhah</span>
+        </div>
+        <div class="text-sihhah-400/70 text-sm font-medium tracking-wide">صحة</div>
+    </nav>
+
+    <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pb-10 text-center">
+        <div class="view-enter">
+            <p class="text-sihhah-400 font-semibold text-sm tracking-widest uppercase mb-4">AI-Powered Discharge Intelligence</p>
+            <h1 class="text-white text-5xl sm:text-7xl font-bold tracking-tight mb-2">Sihhah</h1>
+            <p class="text-sihah-400/60 text-2xl sm:text-3xl font-light mb-6">صحة</p>
+            <p class="text-white/70 text-lg sm:text-xl max-w-xl mx-auto mb-10 leading-relaxed">Transforming messy clinical notes into mobile-friendly, interactive care plans — with a real-time safety net for every patient.</p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                <button data-action="navigate" data-to="#login/staff" class="btn btn-primary text-base px-8 py-3.5 shadow-lg shadow-sihhah-600/30">
+                    <span class="material-symbols-rounded">local_hospital</span> Clinical Staff Portal
+                </button>
+                <button data-action="navigate" data-to="#login/patient" class="btn text-base px-8 py-3.5" style="background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)">
+                    <span class="material-symbols-rounded">person</span> Patient Portal
+                </button>
+            </div>
+        </div>
+
+        <div class="view-enter grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl w-full" style="animation-delay:.15s">
+            <div class="text-center px-4">
+                <div class="stat-num text-white">15%</div>
+                <p class="text-white/50 text-sm mt-1">30-day readmission rate</p>
+            </div>
+            <div class="text-center px-4 border-x border-white/10">
+                <div class="stat-num text-gold-400">68%</div>
+                <p class="text-white/50 text-sm mt-1">Patients confused by notes</p>
+            </div>
+            <div class="text-center px-4">
+                <div class="stat-num text-sihhah-400">40%</div>
+                <p class="text-white/50 text-sm mt-1">Potential readmission reduction</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="relative z-10 text-center py-5 text-white/30 text-xs">MedHack UAE — Project Sihhah</footer>
+</div>`;
+}
+
+function renderStaff(tab) {
+    const db = getDB();
+    const alertCount = activeAlerts(db);
+    return `<div class="min-h-screen bg-[var(--bg)]">
+    <nav class="bg-white border-b border-[var(--border)] sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+            <div class="flex items-center gap-3 cursor-pointer" data-action="navigate" data-to="#landing">
+                <span class="material-symbols-rounded text-sihhah-600 text-2xl">healing</span>
+                <span class="font-bold text-lg text-sihhah-900">Sihhah</span>
+                <span class="text-sihhah-400/50 text-xs font-medium">Hi, ${escHtml(currentUser || 'Staff')}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button data-action="navigate" data-to="#staff" class="tab-btn ${tab==='new'?'active':''}">
+                    <span class="material-symbols-rounded text-base icon-outlined mr-1">note_add</span> New Discharge
+                </button>
+                <button data-action="staff-tab" data-tab="dashboard" class="tab-btn ${tab==='dashboard'?'active':''} relative">
+                    <span class="material-symbols-rounded text-base icon-outlined mr-1">dashboard</span> Dashboard
+                    ${alertCount ? `<span class="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center alert-pulse">${alertCount}</span>` : ''}
+                </button>
+            </div>
+        </div>
+    </nav>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 view-enter">
+        ${tab==='new' ? renderStaffNew() : renderStaffDashboard(db)}
+    </div>
+</div>`;
+}
+
+let parsedResult = null;
+
+function renderStaffNew() {
+    return `<div class="max-w-3xl mx-auto">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-sihhah-900">New Discharge Note</h2>
+        <p class="text-[var(--muted)] mt-1">Paste raw clinical notes below. Sihhah AI will structure them into an interactive care plan.</p>
+    </div>
+    <div class="card p-5 mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <label class="font-semibold text-sm text-sihhah-800">Clinical Discharge Summary</label>
+            <button data-action="load-sample" class="btn btn-ghost text-xs text-sihhah-600">
+                <span class="material-symbols-rounded text-sm">science</span> Load Sample Note
+            </button>
+        </div>
+        <textarea id="notes-input" class="notes-area" placeholder="Paste discharge notes here...&#10;&#10;Example format:&#10;Patient: John Doe&#10;MRN: 12345&#10;Diagnosis: ...&#10;Medications:&#10;1. DrugName Dose - Frequency&#10;..."></textarea>
+        <div class="flex justify-end mt-4">
+            <button id="parse-btn" data-action="parse-notes" class="btn btn-primary px-6">
+                <span class="material-symbols-rounded text-lg">auto_awesome</span> Parse with Sihhah AI
+            </button>
+        </div>
+    </div>
+    <div id="parse-progress" class="hidden card p-5 mb-6"></div>
+    <div id="parse-result" class="hidden"></div>
+</div>`;
+}
+
+function renderParsedPreview(p) {
+    const sections = [];
+    if (p.medications.length) sections.push({title:'Medications',icon:'medication',color:'sihhah',items:p.medications.map(m=>`<div class="flex items-start gap-3 py-2"><span class="material-symbols-rounded text-sihhah-600 text-lg mt-0.5">circle</span><div><span class="font-semibold text-sm">${escHtml(m.name)}</span> <span class="text-sihhah-700 text-sm font-medium">${escHtml(m.dose)}</span><p class="text-[var(--muted)] text-xs mt-0.5">${escHtml(m.frequency)}</p></div></div>`)});
+    if (p.followUps.length) sections.push({title:'Follow-up Appointments',icon:'calendar_today',color:'gold',items:p.followUps.map(f=>`<div class="flex items-center gap-3 py-2"><span class="material-symbols-rounded text-gold-600 text-lg">event</span><div><span class="font-semibold text-sm">${escHtml(f.type)}</span><p class="text-[var(--muted)] text-xs">${escHtml(f.date)}</p></div></div>`)});
+    if (p.diet.length) sections.push({title:'Diet Guidelines',icon:'restaurant',color:'sihhah',items:p.diet.map(d=>`<div class="flex items-center gap-3 py-2"><span class="material-symbols-rounded text-sihhah-600 text-lg">eco</span><span class="text-sm">${escHtml(d.instruction)}</span></div>`)});
+    if (p.activity.length) sections.push({title:'Activity & Mobility',icon:'directions_walk',color:'sihhah',items:p.activity.map(a=>`<div class="flex items-center gap-3 py-2"><span class="material-symbols-rounded text-sihhah-600 text-lg">fitness_center</span><span class="text-sm">${escHtml(a.instruction)}</span></div>`)});
+    if (p.labs.length) sections.push({title:'Lab Tests',icon:'biotech',color:'gold',items:p.labs.map(l=>`<div class="flex items-center gap-3 py-2"><span class="material-symbols-rounded text-gold-600 text-lg">science</span><div><span class="font-semibold text-sm">${escHtml(l.test)}</span><p class="text-[var(--muted)] text-xs">${escHtml(l.timing)}</p></div></div>`)});
+    if (p.warningSigns.length) sections.push({title:'Warning Signs',icon:'warning',color:'red',items:p.warningSigns.map(w=>`<div class="flex items-start gap-3 py-2"><span class="material-symbols-rounded text-red-600 text-lg mt-0.5">error</span><span class="text-sm font-medium">${escHtml(w.symptom)}</span> <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full sev-${w.severity} ml-auto">${w.severity}</span></div>`)});
+    return `<div class="card p-5 mb-6 view-enter">
+        <div class="flex items-center gap-3 mb-5 pb-4 border-b border-[var(--border)]">
+            <div class="w-10 h-10 rounded-full bg-sihhah-100 flex items-center justify-center"><span class="material-symbols-rounded text-sihhah-700">person</span></div>
+            <div>
+                <div class="font-bold text-lg">${escHtml(p.patientName)}</div>
+                <div class="text-[var(--muted)] text-xs">${escHtml(p.mrn)} &middot; ${escHtml(p.dischargeDate)} &middot; ${escHtml(p.diagnosis)}</div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            ${sections.map(s=>`<div class="bg-gray-50 rounded-xl p-4"><div class="flex items-center gap-2 mb-3"><span class="material-symbols-rounded text-${s.color}-600">${s.icon}</span><span class="font-semibold text-sm text-sihhah-900">${s.title}</span><span class="ml-auto text-xs text-[var(--muted)]">${s.items.length}</span></div><div class="divide-y divide-gray-100">${s.items.join('')}</div></div>`).join('')}
+        </div>
+    </div>
+    <div class="flex justify-end gap-3">
+        <button data-action="navigate" data-to="#staff" class="btn btn-outline">Cancel</button>
+        <button data-action="generate-link" class="btn btn-primary px-6">
+            <span class="material-symbols-rounded">link</span> Generate Patient Link
+        </button>
+    </div>`;
+}
+
+function renderStaffDashboard(db) {
+    const pts = db.patients;
+    const totalAlerts = activeAlerts(db);
+    const avgProgress = pts.length ? Math.round(pts.reduce((s,p)=>s+getProgress(p),0)/pts.length) : 0;
+    let alertBanner = '';
+    const unacked = [];
+    pts.forEach(p => p.alerts.forEach(a => { if (!a.acknowledged) unacked.push({...a, patientName:p.patientName, patientId:p.id}); }));
+    if (unacked.length) {
+        alertBanner = `<div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-start gap-3 alert-pulse">
+            <span class="material-symbols-rounded text-red-600 text-2xl mt-0.5">notifications_active</span>
+            <div class="flex-1">
+                <div class="font-bold text-red-800">Active Red Flag Alert${unacked.length>1?'s':''}</div>
+                <div class="text-red-700 text-sm mt-1">${unacked.map(a=>`<span class="inline-block mr-3"><strong>${escHtml(a.patientName)}</strong>: ${escHtml(a.symptom)} <span class="text-red-400 text-xs">${timeAgo(a.time)}</span></span>`).join('')}</div>
+            </div>
+        </div>`;
+    }
+    return `${alertBanner}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="card card-lift p-5"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-sihhah-100 flex items-center justify-center"><span class="material-symbols-rounded text-sihhah-700">group</span></div><div><div class="stat-num text-sihhah-900">${pts.length}</div><div class="text-[var(--muted)] text-xs">Active Patients</div></div></div></div>
+        <div class="card card-lift p-5 ${totalAlerts?'border-red-200 bg-red-50/50':''}"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg ${totalAlerts?'bg-red-100':'bg-gray-100'} flex items-center justify-center"><span class="material-symbols-rounded ${totalAlerts?'text-red-600':'text-gray-400'}">emergency</span></div><div><div class="stat-num ${totalAlerts?'text-red-700':'text-gray-400'}">${totalAlerts}</div><div class="text-[var(--muted)] text-xs">Unacknowledged Alerts</div></div></div></div>
+        <div class="card card-lift p-5"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-sihhah-100 flex items-center justify-center"><span class="material-symbols-rounded text-sihhah-700">trending_up</span></div><div><div class="stat-num text-sihhah-900">${avgProgress}%</div><div class="text-[var(--muted)] text-xs">Avg. Completion</div></div></div></div>
+    </div>
+    <h3 class="font-bold text-lg mb-4">Patient Care Plans</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        ${pts.map(p => {
+            const prog = getProgress(p);
+            const hasAlert = p.alerts.some(a=>!a.acknowledged);
+            return `<div class="card card-lift p-5 cursor-pointer relative" data-action="view-patient-detail" data-id="${p.id}">
+                ${hasAlert?'<div class="absolute top-3 right-3 w-3 h-3 rounded-full bg-red-500 alert-pulse"></div>':''}
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full ${hasAlert?'bg-red-100':'bg-sihhah-100'} flex items-center justify-center">
+                        <span class="material-symbols-rounded ${hasAlert?'text-red-600':'text-sihhah-700'}">person</span>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="font-bold text-sm truncate">${escHtml(p.patientName)}</div>
+                        <div class="text-[var(--muted)] text-xs truncate">${escHtml(p.diagnosis)}</div>
+                    </div>
+                </div>
+                <div class="mb-2 flex items-center justify-between text-xs">
+                    <span class="text-[var(--muted)]">Plan Completion</span>
+                    <span class="font-bold ${prog===100?'text-emerald-600':'text-sihhah-700'}">${prog}%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width:${prog}%"></div></div>
+                <div class="flex items-center justify-between mt-4 text-xs text-[var(--muted)]">
+                    <span>${escHtml(p.dischargeDate)}</span>
+                    <span>${p.medications.length} meds &middot; ${p.warningSigns.length} flags</span>
+                </div>
+            </div>`;
+        }).join('')}
+    </div>`;
+}
+
+function renderPatient(id) {
+    const db = getDB();
+    const p = db.patients.find(x => x.id === id);
+    if (!p) return renderNotFound();
+    const prog = getProgress(p);
+    const timeGroups = { morning:'Morning', evening:'Evening', 'twice-daily':'Twice Daily', 'as-needed':'As Needed', 'before-meal':'Before Meal', 'after-meal':'After Meal' };
+
+    function sectionHeader(icon, title, items, sectionId) {
+        const done = items.filter(i=>i.checked).length;
+        const allDone = items.length > 0 && done === items.length;
+        return `<div class="mb-4">
+            <button data-action="toggle-section" data-section="${sectionId}" class="w-full flex items-center gap-2 py-2 px-1 text-left group">
+                <span class="material-symbols-rounded text-sihhah-600">${icon}</span>
+                <span class="font-bold text-sm flex-1">${title}</span>
+                ${allDone ? '<span class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Complete</span>' : `<span class="text-xs text-[var(--muted)]">${done}/${items.length}</span>`}
+                <span class="material-symbols-rounded text-[var(--muted)] text-lg section-chevron transition-transform" id="chevron-${sectionId}">expand_more</span>
+            </button>
+            <div class="section-body" id="section-${sectionId}" style="max-height:${items.length * 70}px">
+                <div class="space-y-1">${items.map(item => renderCheckItem(item, p.id)).join('')}</div>
+            </div>
+        </div>`;
+    }
+
+    function renderCheckItem(item, pid) {
+        const checked = item.checked;
+        return `<div class="check-item" data-action="toggle-check" data-pid="${pid}" data-iid="${item.id}" data-type="${item.id[0]}">
+            <div class="check-box ${checked?'checked':''}"><span class="material-symbols-rounded">check</span></div>
+            <div class="flex-1 min-w-0">
+                <span class="check-text ${checked?'checked-text':''}">${item.id[0]==='m' ? `<strong>${escHtml(item.name)}</strong> <span class="text-sihhah-700">${escHtml(item.dose)}</span> — ${escHtml(item.frequency)}` : item.id[0]==='f' ? `<strong>${escHtml(item.type)}</strong> — ${escHtml(item.date)}` : item.id[0]==='d' ? escHtml(item.instruction) : item.id[0]==='a' ? escHtml(item.instruction) : `<strong>${escHtml(item.test)}</strong> — ${escHtml(item.timing)}`}</span>
+            </div>
+        </div>`;
+    }
+
+    const medGroups = {};
+    p.medications.forEach(m => { const g = timeGroups[m.timeGroup]||'Other'; (medGroups[g] = medGroups[g]||[]).push(m); });
+    let medSections = '';
+    Object.entries(medGroups).forEach(([group, meds], i) => { medSections += sectionHeader('medication', group + ' Medications', meds, `med-${i}`); });
+
+    return `<div class="min-h-screen bg-[var(--bg)] pb-8">
+    <nav class="bg-white border-b border-[var(--border)] sticky top-0 z-50">
+        <div class="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-2 cursor-pointer" data-action="navigate" data-to="#landing">
+                <span class="material-symbols-rounded text-sihhah-600 text-xl">healing</span>
+                <span class="font-bold text-sihhah-700 text-sm">Sihhah</span>
+            </div>
+            <div class="text-xs text-[var(--muted)]">Hi, ${escHtml(currentUser || '')} — Your Care Plan</div>
+        </div>
+    </nav>
+
+    <div class="max-w-lg mx-auto px-4 pt-6 view-enter">
+        <div class="card p-5 mb-5">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-full bg-sihhah-100 flex items-center justify-center">
+                    <span class="material-symbols-rounded text-sihhah-700 text-2xl">person</span>
+                </div>
+                <div>
+                    <div class="font-bold text-lg">Hello, ${escHtml(p.patientName.split(' ')[0])}</div>
+                    <div class="text-[var(--muted)] text-xs">${escHtml(p.dischargeDate)}</div>
+                </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                <div class="text-[10px] uppercase tracking-wider text-[var(--muted)] font-semibold mb-1">Diagnosis</div>
+                <div class="text-sm font-medium">${escHtml(p.diagnosis)}</div>
+            </div>
+            <div>
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                    <span class="text-[var(--muted)]">Care Plan Progress</span>
+                    <span class="font-bold ${prog===100?'text-emerald-600':'text-sihhah-700'}">${prog}%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width:${prog}%"></div></div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-4">
+            <div class="flex items-center gap-2 mb-3 px-1">
+                <span class="material-symbols-rounded text-sihhah-600">medication</span>
+                <span class="font-bold text-sm">Medications</span>
+            </div>
+            ${medSections}
+        </div>
+
+        ${p.followUps.length ? `<div class="card p-4 mb-4">${sectionHeader('calendar_today','Follow-up Appointments',p.followUps,'followups')}</div>` : ''}
+        ${p.diet.length ? `<div class="card p-4 mb-4">${sectionHeader('restaurant','Diet Guidelines',p.diet,'diet')}</div>` : ''}
+        ${p.activity.length ? `<div class="card p-4 mb-4">${sectionHeader('directions_walk','Activity & Mobility',p.activity,'activity')}</div>` : ''}
+        ${p.labs.length ? `<div class="card p-4 mb-4">${sectionHeader('biotech','Lab Tests',p.labs,'labs')}</div>` : ''}
+
+        <div class="card p-4 mb-4 border-red-200 bg-red-50/40">
+            <div class="flex items-center gap-2 mb-1 px-1">
+                <span class="material-symbols-rounded text-red-600">warning</span>
+                <span class="font-bold text-sm text-red-800">Warning Signs</span>
+            </div>
+            <p class="text-xs text-red-600/80 mb-3 px-1">Contact your care team immediately if you experience any of these:</p>
+            <div class="space-y-2">
+                ${p.warningSigns.map(w => {
+                    let stateClass = '', btnText = 'Report This', btnClass = 'btn-outline text-red-600 border-red-200 hover:bg-red-50';
+                    if (w.acknowledged) { stateClass='acknowledged'; btnText='Team Responded'; btnClass='btn-outline text-emerald-700 border-emerald-200 bg-emerald-50 cursor-default'; }
+                    else if (w.reported) { stateClass='reported'; btnText='Reported — Awaiting Response'; btnClass='btn-gold text-xs cursor-default'; }
+                    return `<div class="warn-card ${stateClass}">
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-rounded text-red-500 text-lg mt-0.5">${w.severity==='critical'?'error':w.severity==='high'?'warning_amber':'info'}</span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-red-900">${escHtml(w.symptom)}</p>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full sev-${w.severity}">${w.severity}</span>
+                                    ${!w.reported && !w.acknowledged ? `<button data-action="report-symptom" data-pid="${p.id}" data-wid="${w.id}" class="btn ${btnClass} text-xs py-1 px-3"><span class="material-symbols-rounded text-sm">send</span> ${btnText}</button>` : `<span class="btn ${btnClass} text-xs py-1 px-3 inline-flex">${w.acknowledged?'<span class="material-symbols-rounded text-sm">check_circle</span>':'<span class="material-symbols-rounded text-sm">schedule</span>'} ${btnText}</span>`}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>
+        <div class="text-center text-xs text-[var(--muted)] mt-6 mb-2">Powered by Sihhah AI &middot; MedHack UAE</div>
+    </div>
+</div>`;
+}
+
+function renderNotFound() {
+    return `<div class="min-h-screen flex items-center justify-center px-6">
+    <div class="text-center view-enter">
+        <span class="material-symbols-rounded text-gray-300 text-6xl mb-4">search_off</span>
+        <h2 class="text-xl font-bold mb-2">Not Found</h2>
+        <p class="text-[var(--muted)] mb-6">This patient care plan doesn't exist or has been removed.</p>
+        <button data-action="navigate" data-to="#landing" class="btn btn-primary">Back to Home</button>
+    </div>
+</div>`;
+}
+
+function handleAction(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    const action = target.dataset.action;
+
+    switch(action) {
+        case 'do-login': {
+            const type = target.dataset.type;
+            const nameInput = document.getElementById('login-name');
+            const name = nameInput ? nameInput.value.trim() : '';
+            if (!name) { toast('Please enter your name','warning'); return; }
+            const passInput = document.getElementById('login-pass');
+            const pass = passInput ? passInput.value.trim() : '';
+            const expectedPass = type === 'staff' ? 'doctor123' : 'patient123';
+            if (pass !== expectedPass) { toast('Incorrect password','error'); return; }
+            currentUser = name;
+            if (type === 'staff') navigate('#staff');
+            else navigate('#patient/p001');
+            break;
+        }
+        case 'navigate': {
+            const to = target.dataset.to;
+            if (to) navigate(to);
+            break;
+        }
+        case 'staff-tab': {
+            const tab = target.dataset.tab;
+            if (tab) navigate('#staff/' + tab);
+            break;
+        }
+        case 'load-sample': {
+            const ta = document.getElementById('notes-input');
+            if (ta) { ta.value = SAMPLE_NOTE; toast('Sample note loaded','info'); }
+            break;
+        }
+        case 'parse-notes': {
+            const ta = document.getElementById('notes-input');
+            if (!ta || !ta.value.trim()) { toast('Please paste clinical notes first','warning'); return; }
+            const btn = document.getElementById('parse-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Analyzing...';
+            const progEl = document.getElementById('parse-progress');
+            const resultEl = document.getElementById('parse-result');
+            progEl.classList.remove('hidden');
+            resultEl.classList.add('hidden');
+            parsedResult = null;
+            const steps = [
+                { icon:'description', text:'Analyzing clinical notes structure...' },
+                { icon:'medication', text:'Extracting medications and dosages...' },
+                { icon:'calendar_today', text:'Identifying follow-up appointments...' },
+                { icon:'restaurant', text:'Categorizing diet and activity guidelines...' },
+                { icon:'warning', text:'Detecting warning signs and red flags...' },
+                { icon:'check_circle', text:'Care plan structured successfully!' }
+            ];
+            let stepHtml = steps.map((s,i) => `<div class="parse-step" id="pstep-${i}"><div class="step-icon"><span class="material-symbols-rounded" style="font-size:14px">${s.icon}</span></div><span class="text-sm">${s.text}</span></div>`).join('');
+            progEl.innerHTML = stepHtml;
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i > 0) { const prev = document.getElementById('pstep-'+(i-1)); if(prev){prev.classList.remove('active');prev.classList.add('done');} }
+                if (i < steps.length) { const cur = document.getElementById('pstep-'+i); if(cur) cur.classList.add('active'); }
+                i++;
+                if (i > steps.length) {
+                    clearInterval(interval);
+                    parsedResult = parseDischargeNotes(ta.value);
+                    resultEl.innerHTML = renderParsedPreview(parsedResult);
+                    resultEl.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-symbols-rounded text-lg">auto_awesome</span> Parse with Sihhah AI';
+                    toast('Care plan generated successfully','success');
+                }
+            }, 450);
+            break;
+        }
+        case 'generate-link': {
+            if (!parsedResult) { toast('Parse notes first','warning'); return; }
+            const db = getDB();
+            db.patients.push(parsedResult);
+            saveDB(db);
+            const link = window.location.origin + window.location.pathname + '#patient/' + parsedResult.id;
+            showModal(`
+                <div class="text-center mb-5">
+                    <div class="w-14 h-14 rounded-full bg-sihhah-100 flex items-center justify-center mx-auto mb-3"><span class="material-symbols-rounded text-sihhah-700 text-3xl">check_circle</span></div>
+                    <h3 class="text-xl font-bold">Patient Link Generated</h3>
+                    <p class="text-[var(--muted)] text-sm mt-1">Share this link with ${escHtml(parsedResult.patientName)}</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4 mb-5 flex items-center gap-3">
+                    <span class="material-symbols-rounded text-[var(--muted)] text-xl">link</span>
+                    <code class="text-xs text-sihhah-800 flex-1 break-all leading-relaxed">${escHtml(link)}</code>
+                </div>
+                <div class="flex gap-3">
+                    <button data-action="copy-link" data-link="${escHtml(link)}" class="btn btn-primary flex-1 justify-center"><span class="material-symbols-rounded text-lg">content_copy</span> Copy Link</button>
+                    <button data-action="close-modal" class="btn btn-outline flex-1 justify-center">Done</button>
+                </div>
+            `);
+            parsedResult = null;
+            break;
+        }
+        case 'copy-link': {
+            const link = target.dataset.link;
+            navigator.clipboard.writeText(link).then(()=> toast('Link copied to clipboard','success')).catch(()=> toast('Copy failed — please copy manually','error'));
+            break;
+        }
+        case 'close-modal': {
+            closeModal();
+            break;
+        }
+        case 'toggle-check': {
+            const pid = target.dataset.pid, iid = target.dataset.iid, type = target.dataset.type;
+            const db = getDB();
+            const p = db.patients.find(x=>x.id===pid);
+            if (!p) return;
+            const lists = {m:'medications',f:'followUps',d:'diet',a:'activity',l:'labs'};
+            const list = p[lists[type]];
+            if (!list) return;
+            const item = list.find(x=>x.id===iid);
+            if (!item) return;
+            item.checked = !item.checked;
+            saveDB(db);
+            const box = target.querySelector('.check-box');
+            const text = target.querySelector('.check-text');
+            if (box) box.classList.toggle('checked', item.checked);
+            if (text) { text.classList.toggle('checked-text', item.checked); }
+            const prog = getProgress(p);
+            const fill = document.querySelector('.progress-fill');
+            const progLabel = fill?.parentElement?.previousElementSibling?.querySelector('span:last-child');
+            if (fill) fill.style.width = prog + '%';
+            if (progLabel) { progLabel.textContent = prog+'%'; progLabel.className = 'font-bold '+(prog===100?'text-emerald-600':'text-sihhah-700'); }
+            break;
+        }
+        case 'toggle-section': {
+            const sid = target.dataset.section;
+            const body = document.getElementById('section-'+sid);
+            const chevron = document.getElementById('chevron-'+sid);
+            if (body) body.classList.toggle('collapsed');
+            if (chevron) chevron.style.transform = body?.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+            break;
+        }
+        case 'report-symptom': {
+            const pid = target.dataset.pid, wid = target.dataset.wid;
+            const db = getDB();
+            const p = db.patients.find(x=>x.id===pid);
+            if (!p) return;
+            const w = p.warningSigns.find(x=>x.id===wid);
+            if (!w || w.reported) return;
+            w.reported = true;
+            p.alerts.push({ id:'al'+Date.now(), symptom:w.symptom, time:new Date().toISOString(), acknowledged:false });
+            saveDB(db);
+            toast('Your care team has been notified. They will respond shortly.','warning');
+            document.getElementById('app').innerHTML = renderPatient(pid);
+            window.scrollTo(0, document.body.scrollHeight);
+            break;
+        }
+        case 'view-patient-detail': {
+            const pid = target.dataset.id;
+            if (pid) {
+                const db = getDB();
+                const p = db.patients.find(x=>x.id===pid);
+                if (!p) return;
+                const prog = getProgress(p);
+                const unacked = p.alerts.filter(a=>!a.acknowledged);
+                showModal(`
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-full bg-sihhah-100 flex items-center justify-center"><span class="material-symbols-rounded text-sihhah-700 text-2xl">person</span></div>
+                        <div>
+                            <div class="font-bold text-lg">${escHtml(p.patientName)}</div>
+                            <div class="text-[var(--muted)] text-xs">${escHtml(p.diagnosis)}</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-5">
+                        <div class="bg-gray-50 rounded-lg p-3 text-center"><div class="text-xl font-bold text-sihhah-700">${p.medications.length}</div><div class="text-[10px] text-[var(--muted)]">Medications</div></div>
+                        <div class="bg-gray-50 rounded-lg p-3 text-center"><div class="text-xl font-bold text-sihhah-700">${prog}%</div><div class="text-[10px] text-[var(--muted)]">Complete</div></div>
+                        <div class="bg-gray-50 rounded-lg p-3 text-center"><div class="text-xl font-bold ${unacked.length?'text-red-600':'text-gray-400'}">${unacked.length}</div><div class="text-[10px] text-[var(--muted)]">Alerts</div></div>
+                    </div>
+                    ${unacked.length ? `<div class="mb-5"><div class="font-semibold text-sm text-red-700 mb-2">Active Alerts</div>${unacked.map(a=>`<div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2 flex items-center justify-between"><div><span class="text-sm font-medium text-red-800">${escHtml(a.symptom)}</span><div class="text-xs text-red-500">${timeAgo(a.time)}</div></div><button data-action="acknowledge-alert" data-pid="${p.id}" data-aid="${a.id}" class="btn btn-outline text-red-600 border-red-200 text-xs py-1 px-3">Acknowledge</button></div>`).join('')}</div>` : '<div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-5 text-sm text-emerald-700 font-medium flex items-center gap-2"><span class="material-symbols-rounded text-lg">check_circle</span> No active alerts</div>'}
+                    <div class="flex gap-3">
+                        <button data-action="open-patient-from-modal" data-pid="${p.id}" class="btn btn-primary flex-1 justify-center"><span class="material-symbols-rounded text-lg">open_in_new</span> Open Patient View</button>
+                        <button data-action="close-modal" class="btn btn-outline flex-1 justify-center">Close</button>
+                    </div>
+                `);
+            }
+            break;
+        }
+        case 'open-patient-from-modal': {
+            const pid = target.dataset.pid;
+            closeModal();
+            if (pid) navigate('#patient/' + pid);
+            break;
+        }
+        case 'acknowledge-alert': {
+            const pid = target.dataset.pid, aid = target.dataset.aid;
+            const db = getDB();
+            const p = db.patients.find(x=>x.id===pid);
+            if (!p) return;
+            const alert = p.alerts.find(a=>a.id===aid);
+            if (alert) alert.acknowledged = true;
+            const w = p.warningSigns.find(w=>alert && w.symptom===alert.symptom && w.reported && !w.acknowledged);
+            if (w) w.acknowledged = true;
+            saveDB(db);
+            toast('Alert acknowledged','success');
+            closeModal();
+            document.getElementById('app').innerHTML = renderStaff('dashboard');
+            break;
+        }
+    }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('hashchange', router);
+document.getElementById('app').addEventListener('click', handleAction);
+
+// Modal click handler: close on backdrop click, delegate actions inside modal
+document.getElementById('modal-root').addEventListener('click', function(e) {
+    // Clicking the dark backdrop closes the modal
+    if (e.target.id === 'modal-overlay') {
+        closeModal();
+        return;
+    }
+    // Everything inside the modal box goes through handleAction
+    handleAction(e);
+});
+
+router();
+</script>
+</body>
+</html>
